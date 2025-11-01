@@ -1,11 +1,12 @@
-const Libro = require('../models/libro.model');
+import Libro from '../models/libro.model.js'; // Importa el modelo (con .js)
 
-exports.getLibros = async (req, res) => {
+// GET /api/libros (con tu lógica de búsqueda)
+export const getLibros = async (req, res) => {
   try {
     const { search } = req.query;
     let filtro = {};
     if (search) {
-      const regex = new RegExp(search, 'i');
+      const regex = new RegExp(search, 'i'); // 'i' para no distinguir mayúsculas/minúsculas
 
       filtro = {
         $or: [
@@ -21,9 +22,10 @@ exports.getLibros = async (req, res) => {
   }
 };
 
-exports.createLibro = async (req, res) => {
+// POST /api/libros
+export const createLibro = async (req, res) => {
   try {
-    const nuevoLibro = new Libro(req.body);
+    const nuevoLibro = new Libro(req.body); // req.body tiene {titulo, autor, etc.}
     const libroGuardado = await nuevoLibro.save();
     res.status(201).json(libroGuardado);
   } catch (error) {
@@ -31,12 +33,13 @@ exports.createLibro = async (req, res) => {
   }
 };
 
-exports.updateLibro = async (req, res) => {
+// PUT /api/libros/:id
+export const updateLibro = async (req, res) => {
   try {
     const libroActualizado = await Libro.findByIdAndUpdate(
       req.params.id, 
       req.body, 
-      { new: true }
+      { new: true } // Devuelve el documento actualizado
     );
     if (!libroActualizado) {
       return res.status(404).json({ message: 'Libro no encontrado' });
@@ -47,7 +50,8 @@ exports.updateLibro = async (req, res) => {
   }
 };
 
-exports.deleteLibro = async (req, res) => {
+// DELETE /api/libros/:id
+export const deleteLibro = async (req, res) => {
   try {
     const libroEliminado = await Libro.findByIdAndDelete(req.params.id);
      if (!libroEliminado) {
