@@ -1,15 +1,20 @@
-const express = require('express');
-const mongoose = require('mongoose');
-const cors = require('cors');
-require('dotenv').config();
+// 1. Importaciones (ES Modules)
+import express from 'express';
+import mongoose from 'mongoose';
+import cors from 'cors';
+import 'dotenv/config'; // Esto reemplaza require('dotenv').config()
 
+// 2. Importar tus rutas (¡con .js al final!)
+import libroRoutes from './routes/libro.routes.js';
+import usuarioRoutes from './routes/usuario.routes.js';
+import prestamoRoutes from './routes/prestamo.routes.js';
+import authRoutes from './routes/auth.routes.js'; // <-- Ruta movida al inicio
+
+// --- Configuración Principal ---
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
+// --- Conexión a MongoDB ---
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => {
     console.log('✅ Conectado a MongoDB Atlas exitosamente');
@@ -18,6 +23,12 @@ mongoose.connect(process.env.MONGODB_URI)
     console.error('❌ Error conectando a MongoDB:', error);
   });
 
+// --- Middlewares ---
+app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// --- Rutas de API ---
 app.get('/', (req, res) => {
   res.json({ message: 'Servidor de la Biblioteca funcionando' });
 });
@@ -29,18 +40,13 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-const libroRoutes = require('./routes/libro.routes');
+// Aquí van TODAS tus rutas, JUNTAS
 app.use('/api/libros', libroRoutes);
-
-const usuarioRoutes = require('./routes/usuario.routes');
 app.use('/api/usuarios', usuarioRoutes);
-
-const prestamoRoutes = require('./routes/prestamo.routes');
 app.use('/api/prestamos', prestamoRoutes);
+app.use('/api/auth', authRoutes); // <-- Ruta en el lugar correcto
 
+// --- Iniciar el Servidor (SIEMPRE AL FINAL) ---
 app.listen(PORT, () => {
   console.log(`🚀 Servidor ejecutándose en puerto ${PORT}`);
 });
-
-const authRoutes = require('./routes/auth.routes');
-app.use('/api/auth', authRoutes);

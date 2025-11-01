@@ -1,13 +1,12 @@
-import Libro from '../models/libro.model.js'; // Importa el modelo (con .js)
+import Libro from '../models/libro.model.js'; // ¡Con .js!
 
-// GET /api/libros (con tu lógica de búsqueda)
+// GET /api/libros (con búsqueda)
 export const getLibros = async (req, res) => {
   try {
     const { search } = req.query;
     let filtro = {};
     if (search) {
-      const regex = new RegExp(search, 'i'); // 'i' para no distinguir mayúsculas/minúsculas
-
+      const regex = new RegExp(search, 'i'); // 'i' = case-insensitive
       filtro = {
         $or: [
           { titulo: regex },
@@ -25,7 +24,7 @@ export const getLibros = async (req, res) => {
 // POST /api/libros
 export const createLibro = async (req, res) => {
   try {
-    const nuevoLibro = new Libro(req.body); // req.body tiene {titulo, autor, etc.}
+    const nuevoLibro = new Libro(req.body);
     const libroGuardado = await nuevoLibro.save();
     res.status(201).json(libroGuardado);
   } catch (error) {

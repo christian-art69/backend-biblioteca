@@ -1,31 +1,33 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const libroSchema = new mongoose.Schema({
   titulo: {
     type: String,
-    required: [true, 'El título es obligatorio']
+    required: true,
+    trim: true
   },
   autor: {
     type: String,
-    required: [true, 'El autor es obligatorio']
+    required: true,
+    trim: true
   },
-  genero: {
-    type: String,
-    default: 'No especificado'
+  editorial: {
+    type: String
   },
-  ano: {
+  anoPublicacion: {
     type: Number
   },
-  cantidad: {
-    type: Number,
-    required: true,
-    default: 1,
-    min: 0
+  genero: {
+    type: String
+  },
+  disponible: {
+    type: Boolean,
+    default: true // Importante para la lógica de préstamos
   }
 }, {
-  timestamps: true 
+  timestamps: true
 });
 
 const Libro = mongoose.model('Libro', libroSchema);
 
-module.exports = Libro;
+export default Libro;

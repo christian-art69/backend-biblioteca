@@ -1,18 +1,31 @@
-const express = require('express');
+import express from 'express';
+import { verifyToken } from '../middlewares/authMiddleware.js';
+import { isAdmin } from '../middlewares/adminMiddleware.js';
+
+import {
+  createPrestamo,
+  devolverPrestamo,
+  getAllPrestamos,
+  getMisPrestamos
+} from '../controllers/prestamo.controller.js'; // ¡Con .js!
+
 const router = express.Router();
 
-const prestamoController = require('../controllers/prestamo.controller');
+// --- Rutas de Admin ---
 
-router.get('/', prestamoController.getPrestamos);
+// POST /api/prestamos (Crear un préstamo)
+router.post('/', [verifyToken, isAdmin], createPrestamo);
 
-router.post('/', prestamoController.createPrestamo);
+// PUT /api/prestamos/:id/devolver (Marcar un préstamo como devuelto)
+router.put('/:id/devolver', [verifyToken, isAdmin], devolverPrestamo);
 
-router.put('/:id', prestamoController.updatePrestamo);
+// GET /api/prestamos (Ver TODOS los préstamos)
+router.get('/', [verifyToken, isAdmin], getAllPrestamos);
 
-router.post('/devolver/:id', prestamoController.archivarPrestamo);
+// --- Rutas de Usuario (Estudiante) ---
 
-router.delete('/eliminar/:id', prestamoController.eliminarPrestamoCorrecion);
+// GET /api/prestamos/mis-prestamos (Ver solo mis préstamos)
+router.get('/mis-prestamos', verifyToken, getMisPrestamos);
 
-router.get('/historial', prestamoController.getHistorial);
 
-module.exports = router;
+export default router;

@@ -1,29 +1,26 @@
 import express from 'express';
-import { verifyToken } from '../middlewares/authMiddleware.js'; // Importa el middleware de token
-import { isAdmin } from '../middlewares/adminMiddleware.js';     // Importa el middleware de Admin
+// Importa los middlewares
+import { verifyToken } from '../middlewares/authMiddleware.js';
+import { isAdmin } from '../middlewares/adminMiddleware.js';
 
-// Importamos todas las funciones del controlador como un objeto
-import * as libroController from '../controllers/libro.controller.js'; // ¡Añade .js!
+// Importa todas las funciones del controlador
+import * as libroController from '../controllers/libro.controller.js'; // ¡Con .js!
 
 const router = express.Router();
 
 // --- Rutas ---
 
-// GET /api/libros (Ver libros)
-// Requisito: "acceso para todos los usuarios" (logueados)
+// GET /api/libros (Cualquier usuario logueado)
 router.get('/', verifyToken, libroController.getLibros);
 
-// POST /api/libros (Crear libro)
-// Requisito: "acceso solo para administradores"
+// POST /api/libros (Solo Admin)
 router.post('/', [verifyToken, isAdmin], libroController.createLibro);
 
-// PUT /api/libros/:id (Actualizar libro)
-// Requisito: "acceso solo para administradores"
+// PUT /api/libros/:id (Solo Admin)
 router.put('/:id', [verifyToken, isAdmin], libroController.updateLibro);
 
-// DELETE /api/libros/:id (Eliminar libro)
-// Requisito: "acceso solo para administradores"
+// DELETE /api/libros/:id (Solo Admin)
 router.delete('/:id', [verifyToken, isAdmin], libroController.deleteLibro);
 
 
-export default router; // Exportación por defecto
+export default router;

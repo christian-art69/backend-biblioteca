@@ -1,15 +1,13 @@
-const express = require('express');
+import express from 'express';
+// Importa las funciones específicas del controlador
+import { register, login } from '../controllers/authController.js'; // ¡Con .js!
+
 const router = express.Router();
-const authController = require('../controllers/authController');
 
 // @ruta    POST api/auth/register
-// @desc    Registrar un nuevo usuario
-// @acceso  Público
-router.post('/register', authController.register);
+router.post('/register', register);
 
 // @ruta    POST api/auth/login
-// @desc    Iniciar sesión (autenticar) y obtener token
-// @acceso  Público
-router.post('/login', authController.login);
+router.post('/login', login);
 
-module.exports = router;
+export default router;

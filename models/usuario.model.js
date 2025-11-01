@@ -1,5 +1,5 @@
-const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs');
+import mongoose from 'mongoose';
+import bcrypt from 'bcryptjs';
 
 const usuarioSchema = new mongoose.Schema({
   nombre: {
@@ -8,11 +8,13 @@ const usuarioSchema = new mongoose.Schema({
   },
   correo: {
     type: String,
-    required: [true, 'El correo es obligatorio']
+    required: [true, 'El correo es obligatorio'],
+    unique: true
   },
   rut: {
     type: String,
-    required: [true, 'El rut es obligatorio']
+    required: [true, 'El rut es obligatorio'],
+    unique: true
   },
   cargo: {
     type: String,
@@ -30,19 +32,18 @@ const usuarioSchema = new mongoose.Schema({
   },
   situacion: {
     type: String,
-    enum: ['Vigente','Atrasado','Bloqueado','Prestamo Activo'],
+    enum: ['Vigente', 'Atrasado', 'Bloqueado', 'Prestamo Activo'],
     default: 'Vigente'
   }
-}, 
-{
-  timestamps: true 
+}, {
+  timestamps: true
 });
 
+// Middleware para hashear la contraseña
 usuarioSchema.pre('save', async function(next) {
   if (!this.isModified('password')) {
     return next();
   }
-
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
   next();
@@ -50,4 +51,4 @@ usuarioSchema.pre('save', async function(next) {
 
 const Usuario = mongoose.model('Usuario', usuarioSchema);
 
-module.exports = Usuario;
+export default Usuario;

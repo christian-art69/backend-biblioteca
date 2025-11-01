@@ -1,165 +1,99 @@
-const Prestamo = require('../models/prestamo.model');
-const Usuario = require('../models/usuario.model');
-const Libro = require('../models/libro.model');
-const Historico = require('../models/historico.model');
+import Prestamo from '../models/prestamo.model.js';
+import Libro from '../models/libro.model.js';
+import Usuario from '../models/usuario.model.js';
 
-exports.getPrestamos = async (req, res) => {
+// --- (Solo Admin) ---
+// POST /api/prestamos
+export const createPrestamo = async (req, res) => {
+  const { usuarioId, libroId, fechaDevolucionLimite } = req.body;
+
   try {
-    const prestamos = await Prestamo.find()
-      .populate('usuario')
-      .populate('libro');
-    res.json(prestamos);
-  } catch (error) {
-    res.status(500).json({ message: 'Error al obtener los prestamos', error: error.message });
-  }
-};
-
-exports.createPrestamo = async (req, res) => {
-  try {
-    const { usuario: usuarioId, libro: libroId } = req.body;
-
-    const usuario = await Usuario.findById(usuarioId);
-    if (!usuario) {
-      return res.status(404).json({ message: 'Usuario no encontrado' });
-    }
-
-    if (usuario.situacion !== 'Vigente') { 
-      return res.status(403).json({ 
-        message: `El usuario ${usuario.nombre} tiene un estado de "${usuario.situacion}" y no puede pedir préstamos.`
-      });
-    }
-    
+    // 1. Verificar si el libro está disponible
     const libro = await Libro.findById(libroId);
-    if (!libro) {
-      return res.status(404).json({ message: 'Libro no encontrado' });
-    }
-    if (libro.cantidad === 0) {
-      return res.status(400).json({ 
-        message: `No quedan copias disponibles de "${libro.titulo}"` 
-      });
+    if (!libro || !libro.disponible) {
+      return res.status(400).json({ message: 'Libro no disponible' });
     }
 
-    const nuevoPrestamo = new Prestamo(req.body);
+    // 2. Verificar si el usuario está vigente
+    const usuario = await Usuario.findById(usuarioId);
+    if (!usuario || usuario.situacion !== 'Vigente') {
+      return res.status(400).json({ message: 'Usuario no apto para préstamo (situación no vigente)' });
+    }
+
+    // 3. Crear el préstamo
+    const nuevoPrestamo = new Prestamo({
+      usuario: usuarioId,
+      libro: libroId,
+      fechaDevolucionLimite
+    });
     await nuevoPrestamo.save();
 
-    usuario.situacion = 'Prestamo Activo'; 
-    await usuario.save();
-    libro.cantidad -= 1; 
-    await libro.save();
+    // 4. Actualizar el estado del libro y del usuario
+    await Libro.findByIdAndUpdate(libroId, { disponible: false });
+    await Usuario.findByIdAndUpdate(usuarioId, { situacion: 'Prestamo Activo' });
 
-    const prestamoPopulado = await Prestamo.findById(nuevoPrestamo._id)
-      .populate('usuario')
-      .populate('libro');
-
-    res.status(201).json(prestamoPopulado);
-
+    res.status(201).json(nuevoPrestamo);
   } catch (error) {
-    res.status(400).json({ message: 'Error al crear el prestamo', error: error.message });
+    res.status(500).json({ message: 'Error al crear el préstamo', error: error.message });
   }
 };
 
-exports.archivarPrestamo = async (req, res) => {
-  try {
-    const { observaciones } = req.body;
-    const prestamo = await Prestamo.findById(req.params.id);
-    if (!prestamo) {
-      return res.status(404).json({ message: 'Prestamo no encontrado' });
-    }
-
-    let estadoFinal = 'A tiempo';
-    const hoy = new Date();
-    hoy.setHours(0, 0, 0, 0);
-
-    if (prestamo.fechaDevolucion && hoy > prestamo.fechaDevolucion) {
-      estadoFinal = 'Atrasado';
-    }
-
-    const nuevoHistorico = new Historico({
-      usuario: prestamo.usuario,
-      libro: prestamo.libro,
-      fechaPrestamo: prestamo.fechaPrestamo,
-      fechaDevolucionEstimada: prestamo.fechaDevolucion,
-      fechaDevolucionReal: new Date(),
-      estadoEntrega: estadoFinal,
-      observaciones: observaciones || 'Sin observaciones'
-    });
-    await nuevoHistorico.save();
-
-    await Prestamo.findByIdAndDelete(req.params.id);
-
-    await Libro.findByIdAndUpdate(prestamo.libro, { $inc: { cantidad: 1 } });
-    
-    const otrosPrestamos = await Prestamo.countDocuments({ usuario: prestamo.usuario });
-    if (otrosPrestamos === 0) {
-      const usuario = await Usuario.findById(prestamo.usuario);
-      if (usuario && (usuario.situacion === 'Prestamo Activo')) {
-         await Usuario.findByIdAndUpdate(prestamo.usuario, { situacion: 'Vigente' });
-      }
-    }
-    
-    res.json({ message: 'Préstamo archivado y libro re-abastecido' });
-
-  } catch (error) {
-    res.status(500).json({ message: 'Error al archivar el prestamo', error: error.message });
-  }
-};
-
-exports.eliminarPrestamoCorrecion = async (req, res) => {
+// --- (Solo Admin) ---
+// PUT /api/prestamos/:id/devolver
+export const devolverPrestamo = async (req, res) => {
   try {
     const prestamo = await Prestamo.findById(req.params.id);
     if (!prestamo) {
-      return res.status(404).json({ message: 'Prestamo no encontrado' });
+      return res.status(404).json({ message: 'Préstamo no encontrado' });
+    }
+    if (prestamo.estado === 'Devuelto') {
+      return res.status(400).json({ message: 'Este libro ya fue devuelto' });
     }
 
-    await Libro.findByIdAndUpdate(prestamo.libro, { $inc: { cantidad: 1 } });
+    // 1. Actualizar el préstamo
+    prestamo.estado = 'Devuelto';
+    prestamo.fechaDevolucionReal = Date.now();
+    await prestamo.save();
 
-    await Prestamo.findByIdAndDelete(req.params.id);
+    // 2. Actualizar el libro (vuelve a estar disponible)
+    await Libro.findByIdAndUpdate(prestamo.libro, { disponible: true });
 
-    const otrosPrestamos = await Prestamo.countDocuments({ usuario: prestamo.usuario });
-    if (otrosPrestamos === 0) {
-      const usuario = await Usuario.findById(prestamo.usuario);
-      if (usuario && (usuario.situacion === 'Prestamo Activo')) {
-         await Usuario.findByIdAndUpdate(prestamo.usuario, { situacion: 'Vigente' });
-      }
-    }
+    // 3. Actualizar el usuario (vuelve a estar vigente)
+    // (Aquí podrías añadir lógica para verificar si tiene otros préstamos)
+    await Usuario.findByIdAndUpdate(prestamo.usuario, { situacion: 'Vigente' });
 
-    res.json({ message: 'Préstamo erróneo eliminado y libro re-abastecido' });
-
+    res.json({ message: 'Libro devuelto exitosamente', prestamo });
   } catch (error) {
-    res.status(500).json({ message: 'Error al borrar el prestamo', error: error.message });
+    res.status(500).json({ message: 'Error al devolver el préstamo', error: error.message });
   }
 };
 
-exports.getHistorial = async (req, res) => {
+// --- (Solo Admin) ---
+// GET /api/prestamos (Obtener todos)
+export const getAllPrestamos = async (req, res) => {
   try {
-    const historial = await Historico.find()
-      .populate('usuario')
-      .populate('libro')
-      .sort({ fechaDevolucion: -1 });
-      
-    res.json(historial);
+    const prestamos = await Prestamo.find()
+      .populate('usuario', 'nombre correo rut') // Trae info del usuario
+      .populate('libro', 'titulo autor');      // Trae info del libro
+    res.json(prestamos);
   } catch (error) {
-    res.status(500).json({ message: 'Error al obtener el historial', error: error.message });
+    res.status(500).json({ message: 'Error al obtener préstamos', error: error.message });
   }
 };
 
-exports.updatePrestamo = async (req, res) => {
+// --- (Usuario logueado) ---
+// GET /api/prestamos/mis-prestamos
+export const getMisPrestamos = async (req, res) => {
   try {
-    const prestamoActualizado = await Prestamo.findByIdAndUpdate(
-      req.params.id, 
-      req.body, 
-      { new: true } 
-    )
-    .populate('usuario')
-    .populate('libro');
-
-    if (!prestamoActualizado) {
-      return res.status(404).json({ message: 'Prestamo no encontrado' });
+    // req.user.id viene del middleware verifyToken
+    const prestamos = await Prestamo.find({ usuario: req.user.id })
+      .populate('libro', 'titulo autor fechaDevolucionLimite');
+    
+    if (!prestamos) {
+      return res.json([]); // Devuelve array vacío si no tiene
     }
-    
-    res.json(prestamoActualizado);
-    
+    res.json(prestamos);
   } catch (error) {
-    res.status(400).json({ message: 'Error al actualizar el prestamo', error: error.message });
+    res.status(500).json({ message: 'Error al obtener mis préstamos', error: error.message });
   }
 };
