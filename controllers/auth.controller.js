@@ -25,7 +25,9 @@ export const register = async (req, res) => {
     res.status(201).json({ message: 'Usuario registrado exitosamente' });
 
   } catch (error) {
-    res.status(500).json({ message: 'Error en el servidor', error: error.message });
+    // CORREGIDO
+    console.error('Error en register:', error.message);
+    res.status(500).json({ message: 'Error interno del servidor' });
   }
 };
 
@@ -69,6 +71,8 @@ export const login = async (req, res) => {
     res.json({ token });
 
   } catch (error) {
-    res.status(500).json({ message: 'Error en el servidor', error: error.message });
+    // CORREGIDO
+    console.error('Error en login:', error.message);
+    res.status(500).json({ message: 'Error interno del servidor' });
   }
 };

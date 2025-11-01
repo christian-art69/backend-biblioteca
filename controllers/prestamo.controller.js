@@ -1,6 +1,7 @@
 import Prestamo from '../models/prestamo.model.js';
 import Libro from '../models/libro.model.js';
 import Usuario from '../models/usuario.model.js';
+import Historico from '../models/historico.model.js'; // ¡PASO 4: IMPORTADO!
 
 // --- (Solo Admin) ---
 // POST /api/prestamos
@@ -34,7 +35,9 @@ export const createPrestamo = async (req, res) => {
 
     res.status(201).json(nuevoPrestamo);
   } catch (error) {
-    res.status(500).json({ message: 'Error al crear el préstamo', error: error.message });
+    // PASO 2 (CORREGIDO)
+    console.error('Error al crear préstamo:', error.message);
+    res.status(500).json({ message: 'Error interno del servidor' });
   }
 };
 
@@ -51,20 +54,47 @@ export const devolverPrestamo = async (req, res) => {
     }
 
     // 1. Actualizar el préstamo
+    const fechaDevolucionReal = Date.now();
     prestamo.estado = 'Devuelto';
-    prestamo.fechaDevolucionReal = Date.now();
+    prestamo.fechaDevolucionReal = fechaDevolucionReal;
     await prestamo.save();
 
     // 2. Actualizar el libro (vuelve a estar disponible)
     await Libro.findByIdAndUpdate(prestamo.libro, { disponible: true });
 
-    // 3. Actualizar el usuario (vuelve a estar vigente)
-    // (Aquí podrías añadir lógica para verificar si tiene otros préstamos)
-    await Usuario.findByIdAndUpdate(prestamo.usuario, { situacion: 'Vigente' });
+    // --- PASO 4: CREAR REGISTRO EN HISTORIAL ---
+    const estadoEntrega = fechaDevolucionReal > prestamo.fechaDevolucionLimite ? 'Atrasado' : 'A tiempo';
+    
+    const nuevoHistorico = new Historico({
+      usuario: prestamo.usuario,
+      libro: prestamo.libro,
+      fechaPrestamo: prestamo.fechaPrestamo,
+      fechaDevolucionReal: fechaDevolucionReal,
+      fechaDevolucionEstimada: prestamo.fechaDevolucionLimite,
+      estadoEntrega: estadoEntrega
+    });
+    await nuevoHistorico.save();
+    // ------------------------------------------
+
+    // --- PASO 3: LÓGICA DE ESTADO DE USUARIO ---
+    // Verificamos si el usuario AÚN tiene otros préstamos activos
+    const otrosPrestamosActivos = await Prestamo.findOne({
+      usuario: prestamo.usuario,
+      estado: 'Activo'
+    });
+
+    // Si NO tiene más préstamos activos, su situación vuelve a 'Vigente'
+    if (!otrosPrestamosActivos) {
+      await Usuario.findByIdAndUpdate(prestamo.usuario, { situacion: 'Vigente' });
+    }
+    // Si tiene otros préstamos, su situación sigue siendo 'Prestamo Activo' (no hacemos nada)
+    // ------------------------------------------
 
     res.json({ message: 'Libro devuelto exitosamente', prestamo });
   } catch (error) {
-    res.status(500).json({ message: 'Error al devolver el préstamo', error: error.message });
+    // PASO 2 (CORREGIDO)
+    console.error('Error al devolver préstamo:', error.message);
+    res.status(500).json({ message: 'Error interno del servidor' });
   }
 };
 
@@ -77,7 +107,9 @@ export const getAllPrestamos = async (req, res) => {
       .populate('libro', 'titulo autor');      // Trae info del libro
     res.json(prestamos);
   } catch (error) {
-    res.status(500).json({ message: 'Error al obtener préstamos', error: error.message });
+    // PASO 2 (CORREGIDO)
+    console.error('Error al obtener préstamos:', error.message);
+    res.status(500).json({ message: 'Error interno del servidor' });
   }
 };
 
@@ -94,6 +126,8 @@ export const getMisPrestamos = async (req, res) => {
     }
     res.json(prestamos);
   } catch (error) {
-    res.status(500).json({ message: 'Error al obtener mis préstamos', error: error.message });
+    // PASO 2 (CORREGIDO)
+    console.error('Error al obtener mis préstamos:', error.message);
+    res.status(500).json({ message: 'Error interno del servidor' });
   }
 };
