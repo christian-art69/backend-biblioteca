@@ -1,63 +1,90 @@
-import Libro from '../models/libro.model.js'; // ¡Con .js!
+import Libro from '../models/libro.model.js';
 
-// GET /api/libros (con búsqueda)
+// --- Rutas Públicas ---
+
+// GET /api/libros (Público)
 export const getLibros = async (req, res) => {
   try {
     const { search } = req.query;
     let filtro = {};
+
     if (search) {
-      const regex = new RegExp(search, 'i'); // 'i' = case-insensitive
+      const regex = new RegExp(search, 'i');
       filtro = {
         $or: [
           { titulo: regex },
-          { autor: regex }
+          { autor: regex },
+          { categoria: regex }
         ]
       };
     }
+
     const libros = await Libro.find(filtro);
     res.json(libros);
   } catch (error) {
-    res.status(500).json({ message: 'Error al obtener los libros', error: error.message });
+    // --- CORREGIDO ---
+    console.error('Error al obtener los libros:', error.message);
+    res.status(500).json({ message: 'Error interno del servidor' });
   }
 };
 
-// POST /api/libros
+// GET /api/libros/:id (Público)
+export const getLibroById = async (req, res) => {
+  try {
+    const libro = await Libro.findById(req.params.id);
+    if (!libro) {
+      return res.status(404).json({ message: 'Libro no encontrado' });
+    }
+    res.json(libro);
+  } catch (error) {
+    // --- CORREGIDO ---
+    console.error('Error al obtener el libro:', error.message);
+    res.status(500).json({ message: 'Error interno del servidor' });
+  }
+};
+
+// --- Rutas de Admin ---
+
+// POST /api/libros (Admin)
 export const createLibro = async (req, res) => {
   try {
     const nuevoLibro = new Libro(req.body);
     const libroGuardado = await nuevoLibro.save();
     res.status(201).json(libroGuardado);
   } catch (error) {
-    res.status(400).json({ message: 'Error al crear el libro', error: error.message });
+    // --- CORREGIDO ---
+    console.error('Error al crear el libro:', error.message);
+    res.status(400).json({ message: 'Error al crear el libro, verifique los datos' });
   }
 };
 
-// PUT /api/libros/:id
+// PUT /api/libros/:id (Admin)
 export const updateLibro = async (req, res) => {
   try {
-    const libroActualizado = await Libro.findByIdAndUpdate(
-      req.params.id, 
-      req.body, 
-      { new: true } // Devuelve el documento actualizado
-    );
+    const libroActualizado = await Libro.findByIdAndUpdate(req.params.id, req.body, { new: true });
     if (!libroActualizado) {
+      // --- CORREGIDO (404 es el estándar para 'No Encontrado') ---
       return res.status(404).json({ message: 'Libro no encontrado' });
     }
     res.json(libroActualizado);
   } catch (error) {
-    res.status(400).json({ message: 'Error al actualizar el libro', error: error.message });
+    // --- CORREGIDO ---
+    console.error('Error al actualizar el libro:', error.message);
+    res.status(400).json({ message: 'Error al actualizar el libro, verifique los datos' });
   }
 };
 
-// DELETE /api/libros/:id
+// DELETE /api/libros/:id (Admin)
 export const deleteLibro = async (req, res) => {
   try {
     const libroEliminado = await Libro.findByIdAndDelete(req.params.id);
-     if (!libroEliminado) {
+    if (!libroEliminado) {
       return res.status(404).json({ message: 'Libro no encontrado' });
     }
     res.json({ message: 'Libro eliminado exitosamente' });
   } catch (error) {
-    res.status(500).json({ message: 'Error al eliminar el libro', error: error.message });
+    // --- CORREGIDO ---
+    console.error('Error al eliminar el libro:', error.message);
+    res.status(500).json({ message: 'Error interno del servidor' });
   }
 };

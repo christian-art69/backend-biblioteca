@@ -1,4 +1,4 @@
-// Corregido: Usar 'import'
+
 import mongoose from 'mongoose';
 
 const historicoSchema = new mongoose.Schema({
@@ -33,6 +33,5 @@ const historicoSchema = new mongoose.Schema({
   }
 }, { timestamps: true });
 
-// Corregido: Usar 'export default'
 const Historico = mongoose.model('Historico', historicoSchema);
 export default Historico;

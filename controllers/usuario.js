@@ -19,7 +19,9 @@ export const getUsuarios = async (req, res) => {
     const usuarios = await Usuario.find(filtro);
     res.json(usuarios);
   } catch (error) {
-    res.status(500).json({ message: 'Error al obtener los usuarios', error: error.message });
+    // --- CORREGIDO ---
+    console.error('Error al obtener los usuarios:', error.message);
+    res.status(500).json({ message: 'Error interno del servidor' });
   }
 };
 
@@ -29,7 +31,10 @@ export const createUsuario = async (req, res) => {
     const usuarioGuardado = await nuevoUsuario.save();
     res.status(201).json(usuarioGuardado);
   } catch (error) {
-    res.status(400).json({ message: 'Error al crear el usuario', error: error.message });
+    // --- CORREGIDO ---
+    // Mantenemos el status 400 (Bad Request) pero ocultamos el error
+    console.error('Error al crear el usuario:', error.message);
+    res.status(400).json({ message: 'Error al crear el usuario, verifique los datos' });
   }
 };
 
@@ -45,14 +50,17 @@ export const updateUsuario = async (req, res) => {
     Object.assign(usuario, otrosDatos);
 
     if (password && password.length > 0) {
-      usuario.password = password;
+      usuario.password = password; // Esto activará el pre-save hook para hashear
     }
 
     const usuarioActualizado = await usuario.save();
     res.json(usuarioActualizado);
 
   } catch (error) {
-    res.status(400).json({ message: 'Error al actualizar el usuario', error: error.message });
+    // --- CORREGIDO ---
+    // Mantenemos el status 400 (Bad Request) pero ocultamos el error
+    console.error('Error al actualizar el usuario:', error.message);
+    res.status(400).json({ message: 'Error al actualizar el usuario, verifique los datos' });
   }
 };
 
@@ -64,7 +72,9 @@ export const deleteUsuario = async (req, res) => {
     }
     res.json({ message: 'Usuario eliminado exitosamente' });
   } catch (error) {
-    res.status(500).json({ message: 'Error al eliminar el usuario', error: error.message });
+    // --- CORREGIDO ---
+    console.error('Error al eliminar el usuario:', error.message);
+    res.status(500).json({ message: 'Error interno del servidor' });
   }
 };
 
@@ -74,9 +84,11 @@ export const getUsuarioById = async (req, res) => {
     if (!usuario) {
       return res.status(404).json({ message: 'Usuario no encontrado' });
     }
-    usuario.password = undefined; 
+    usuario.password = undefined; // ¡Muy bien hecho esto!
     res.json(usuario);
   } catch (error) {
-    res.status(500).json({ message: 'Error al obtener el usuario', error: error.message });
+    // --- CORREGIDO ---
+    console.error('Error al obtener el usuario:', error.message);
+    res.status(500).json({ message: 'Error interno del servidor' });
   }
 };
