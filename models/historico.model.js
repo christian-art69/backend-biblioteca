@@ -1,4 +1,5 @@
-const mongoose = require('mongoose');
+// Corregido: Usar 'import'
+import mongoose from 'mongoose';
 
 const historicoSchema = new mongoose.Schema({
   usuario: {
@@ -32,4 +33,6 @@ const historicoSchema = new mongoose.Schema({
   }
 }, { timestamps: true });
 
-module.exports = mongoose.model('Historico', historicoSchema);
+// Corregido: Usar 'export default'
+const Historico = mongoose.model('Historico', historicoSchema);
+export default Historico;

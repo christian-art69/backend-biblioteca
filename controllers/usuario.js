@@ -1,6 +1,8 @@
-const Usuario = require('../models/usuario.model');
+// Corregido: Usar 'import' y añadir '.js' al final de la ruta del modelo
+import Usuario from '../models/usuario.model.js';
 
-exports.getUsuarios = async (req, res) => {
+// Corregido: Usar 'export const' para cada función
+export const getUsuarios = async (req, res) => {
   try {
     const { search } = req.query;
     let filtro = {};
@@ -21,7 +23,7 @@ exports.getUsuarios = async (req, res) => {
   }
 };
 
-exports.createUsuario = async (req, res) => {
+export const createUsuario = async (req, res) => {
   try {
     const nuevoUsuario = new Usuario(req.body);
     const usuarioGuardado = await nuevoUsuario.save();
@@ -31,7 +33,7 @@ exports.createUsuario = async (req, res) => {
   }
 };
 
-exports.updateUsuario = async (req, res) => {
+export const updateUsuario = async (req, res) => {
   try {
     const { password, ...otrosDatos } = req.body;
 
@@ -54,7 +56,7 @@ exports.updateUsuario = async (req, res) => {
   }
 };
 
-exports.deleteUsuario = async (req, res) => {
+export const deleteUsuario = async (req, res) => {
   try {
     const usuarioEliminado = await Usuario.findByIdAndDelete(req.params.id);
      if (!usuarioEliminado) {
@@ -66,7 +68,7 @@ exports.deleteUsuario = async (req, res) => {
   }
 };
 
-exports.getUsuarioById = async (req, res) => {
+export const getUsuarioById = async (req, res) => {
   try {
     const usuario = await Usuario.findById(req.params.id);
     if (!usuario) {
