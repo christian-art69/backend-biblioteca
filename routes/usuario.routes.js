@@ -1,14 +1,19 @@
+// routes/usuario.routes.js (Corregido)
 import express from 'express';
-// Importamos con sintaxis ESM y el nombre correcto del archivo (.js)
 import * as usuarioController from '../controllers/usuario.js';
+
+// ¡Importamos los middlewares!
+import { verifyToken } from '../middlewares/authMiddleware.js';
+import { isAdmin } from '../middlewares/adminMiddleware.js';
 
 const router = express.Router();
 
-router.get('/', usuarioController.getUsuarios);
-router.post('/', usuarioController.createUsuario);
-router.get('/:id', usuarioController.getUsuarioById);
-router.put('/:id', usuarioController.updateUsuario);
-router.delete('/:id', usuarioController.deleteUsuario);
+// Protegemos todas las rutas con verifyToken e isAdmin
+// Estas rutas ahora solo serán accesibles por administradores logueados.
+router.get('/', [verifyToken, isAdmin], usuarioController.getUsuarios);
+router.post('/', [verifyToken, isAdmin], usuarioController.createUsuario);
+router.get('/:id', [verifyToken, isAdmin], usuarioController.getUsuarioById);
+router.put('/:id', [verifyToken, isAdmin], usuarioController.updateUsuario);
+router.delete('/:id', [verifyToken, isAdmin], usuarioController.deleteUsuario);
 
-// Exportamos con sintaxis ESM
 export default router;
