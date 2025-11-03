@@ -1,8 +1,10 @@
+// /server.js (en tu proyecto de backend)
+
 // 1. Importaciones (ES Modules)
 import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
-import 'dotenv/config'; // Esto reemplaza require('dotenv').config()
+import 'dotenv/config'; 
 
 // 2. Importar tus rutas (¡con .js al final!)
 import libroRoutes from './routes/libro.routes.js';
