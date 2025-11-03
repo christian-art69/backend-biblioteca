@@ -8,7 +8,7 @@ import 'dotenv/config'; // Esto reemplaza require('dotenv').config()
 import libroRoutes from './routes/libro.routes.js';
 import usuarioRoutes from './routes/usuario.routes.js';
 import prestamoRoutes from './routes/prestamo.routes.js';
-import authRoutes from './routes/auth.routes.js'; // <-- Ruta movida al inicio
+import authRoutes from './routes/auth.routes.js';
 
 // --- Configuración Principal ---
 const app = express();
@@ -40,11 +40,19 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// --- CORRECCIÓN AQUÍ ---
+// Esta es la ruta que tu frontend (usuario.service.ts) estaba buscando.
+app.get('/api/test/connection', (req, res) => {
+  res.json({ message: '¡Conexión con el backend exitosa!' });
+});
+// --- FIN DE LA CORRECCIÓN ---
+
+
 // Aquí van TODAS tus rutas, JUNTAS
 app.use('/api/libros', libroRoutes);
 app.use('/api/usuarios', usuarioRoutes);
 app.use('/api/prestamos', prestamoRoutes);
-app.use('/api/auth', authRoutes); // <-- Ruta en el lugar correcto
+app.use('/api/auth', authRoutes);
 
 // --- Iniciar el Servidor (SIEMPRE AL FINAL) ---
 app.listen(PORT, () => {
