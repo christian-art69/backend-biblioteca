@@ -80,11 +80,9 @@ const seedDatabase = async () => {
   } catch (error) {
     console.error('❌ Error al poblar la base de datos:', error);
   } finally {
-    // 3. Desconectar
     await mongoose.connection.close();
     console.log('🔌 Desconectado de MongoDB.');
   }
 };
 
-// Ejecutar el script
 seedDatabase();

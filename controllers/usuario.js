@@ -44,14 +44,13 @@ export const updateUsuario = async (req, res) => {
     Object.assign(usuario, otrosDatos);
 
     if (password && password.length > 0) {
-      usuario.password = password; // Esto activará el pre-save hook para hashear
+      usuario.password = password; 
     }
 
     const usuarioActualizado = await usuario.save();
     res.json(usuarioActualizado);
 
   } catch (error) {
-    // Mantenemos el status 400 (Bad Request) pero ocultamos el error
     console.error('Error al actualizar el usuario:', error.message);
     res.status(400).json({ message: 'Error al actualizar el usuario, verifique los datos' });
   }

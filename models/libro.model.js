@@ -22,7 +22,7 @@ const libroSchema = new mongoose.Schema({
   },
   disponible: {
     type: Boolean,
-    default: true // Importante para la lógica de préstamos
+    default: true 
   }
 }, {
   timestamps: true

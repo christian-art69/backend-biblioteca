@@ -39,7 +39,6 @@ const usuarioSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Middleware para hashear la contraseña
 usuarioSchema.pre('save', async function(next) {
   if (!this.isModified('password')) {
     return next();

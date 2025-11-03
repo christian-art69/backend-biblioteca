@@ -4,12 +4,12 @@ const { Schema } = mongoose;
 const prestamoSchema = new Schema({
   libro: {
     type: Schema.Types.ObjectId,
-    ref: 'Libro', // Referencia al modelo Libro
+    ref: 'Libro', 
     required: true
   },
   usuario: {
     type: Schema.Types.ObjectId,
-    ref: 'Usuario', // Referencia al modelo Usuario
+    ref: 'Usuario', 
     required: true
   },
   fechaPrestamo: {
@@ -21,7 +21,7 @@ const prestamoSchema = new Schema({
     required: true
   },
   fechaDevolucionReal: {
-    type: Date // Se llena solo cuando el libro es devuelto
+    type: Date 
   },
   estado: {
     type: String,

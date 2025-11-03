@@ -15,7 +15,7 @@ export const register = async (req, res) => {
     usuario = new Usuario({
       nombre,
       correo,
-      password, // El modelo 'pre-save' la hashea
+      password, 
       rut,
       cargo,
       rol

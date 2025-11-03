@@ -1,12 +1,5 @@
-import Usuario from '../models/usuario.model.js'; // Importamos el modelo
-
-/**
- * Verifica si el usuario autenticado (adjunto en req.user por verifyToken)
- * tiene el rol de 'Admin'.
- * DEBE usarse después de verifyToken.
- */
+import Usuario from '../models/usuario.model.js'; 
 export const isAdmin = async (req, res, next) => {
-  // req.user debería existir gracias al middleware verifyToken
   if (!req.user || !req.user.id) {
     return res.status(500).json({ message: 'Error: El middleware isAdmin debe usarse después de verifyToken.' });
   }
