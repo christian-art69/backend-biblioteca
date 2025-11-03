@@ -56,7 +56,7 @@ app.use('/api/usuarios', usuarioRoutes);
 app.use('/api/prestamos', prestamoRoutes);
 app.use('/api/auth', authRoutes);
 
-// --- Iniciar el Servidor (SIEMPRE AL FINAL) ---
+// --- Iniciar el Servidor (SIEMPRE AL FINALll) ---
 app.listen(PORT, () => {
   console.log(`🚀 Servidor ejecutándose en puerto ${PORT}`);
-});
+}); 
