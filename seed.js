@@ -1,15 +1,9 @@
-// /seed.js
 import mongoose from 'mongoose';
-import 'dotenv/config'; // Asegúrate de que esto esté primero
-
-// Importa todos tus modelos (con .js al final si usas ES Modules)
+import 'dotenv/config';
 import Usuario from './models/usuario.model.js';
 import Libro from './models/libro.model.js';
 import Prestamo from './models/prestamo.model.js';
 import Historico from './models/historico.model.js';
-
-// --- 1. DATOS DE PRUEBA ---
-
 const usuariosDePrueba = [
   {
     nombre: 'Administrador del Sistema',
@@ -54,8 +48,6 @@ const librosDePrueba = [
     cantidad: 7
   }
 ];
-
-// --- 2. SCRIPT DE INSERCIÓN ---
 
 const seedDatabase = async () => {
   try {

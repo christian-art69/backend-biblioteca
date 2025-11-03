@@ -1,18 +1,12 @@
-// /server.js (en tu proyecto de backend)
-
-// 1. Importaciones (ES Modules)
 import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
 import 'dotenv/config'; 
-
-// 2. Importar tus rutas (¡con .js al final!)
 import libroRoutes from './routes/libro.routes.js';
 import usuarioRoutes from './routes/usuario.routes.js';
 import prestamoRoutes from './routes/prestamo.routes.js';
 import authRoutes from './routes/auth.routes.js';
 
-// --- Configuración Principal ---
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -41,14 +35,10 @@ app.get('/api/health', (req, res) => {
     database: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected'
   });
 });
-
-// --- CORRECCIÓN AQUÍ ---
 // Esta es la ruta que tu frontend (usuario.service.ts) estaba buscando.
 app.get('/api/test/connection', (req, res) => {
   res.json({ message: '¡Conexión con el backend exitosa!' });
 });
-// --- FIN DE LA CORRECCIÓN ---
-
 
 // Aquí van TODAS tus rutas, JUNTAS
 app.use('/api/libros', libroRoutes);

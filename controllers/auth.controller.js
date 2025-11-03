@@ -1,4 +1,4 @@
-import Usuario from '../models/usuario.model.js'; // ¡Con .js!
+import Usuario from '../models/usuario.model.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
@@ -25,7 +25,6 @@ export const register = async (req, res) => {
     res.status(201).json({ message: 'Usuario registrado exitosamente' });
 
   } catch (error) {
-    // CORREGIDO
     console.error('Error en register:', error.message);
     res.status(500).json({ message: 'Error interno del servidor' });
   }
@@ -71,7 +70,6 @@ export const login = async (req, res) => {
     res.json({ token });
 
   } catch (error) {
-    // CORREGIDO
     console.error('Error en login:', error.message);
     res.status(500).json({ message: 'Error interno del servidor' });
   }

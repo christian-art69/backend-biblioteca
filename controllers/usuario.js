@@ -1,7 +1,4 @@
-// Corregido: Usar 'import' y añadir '.js' al final de la ruta del modelo
 import Usuario from '../models/usuario.model.js';
-
-// Corregido: Usar 'export const' para cada función
 export const getUsuarios = async (req, res) => {
   try {
     const { search } = req.query;
@@ -19,7 +16,6 @@ export const getUsuarios = async (req, res) => {
     const usuarios = await Usuario.find(filtro);
     res.json(usuarios);
   } catch (error) {
-    // --- CORREGIDO ---
     console.error('Error al obtener los usuarios:', error.message);
     res.status(500).json({ message: 'Error interno del servidor' });
   }
@@ -31,8 +27,6 @@ export const createUsuario = async (req, res) => {
     const usuarioGuardado = await nuevoUsuario.save();
     res.status(201).json(usuarioGuardado);
   } catch (error) {
-    // --- CORREGIDO ---
-    // Mantenemos el status 400 (Bad Request) pero ocultamos el error
     console.error('Error al crear el usuario:', error.message);
     res.status(400).json({ message: 'Error al crear el usuario, verifique los datos' });
   }
@@ -57,7 +51,6 @@ export const updateUsuario = async (req, res) => {
     res.json(usuarioActualizado);
 
   } catch (error) {
-    // --- CORREGIDO ---
     // Mantenemos el status 400 (Bad Request) pero ocultamos el error
     console.error('Error al actualizar el usuario:', error.message);
     res.status(400).json({ message: 'Error al actualizar el usuario, verifique los datos' });
@@ -72,7 +65,6 @@ export const deleteUsuario = async (req, res) => {
     }
     res.json({ message: 'Usuario eliminado exitosamente' });
   } catch (error) {
-    // --- CORREGIDO ---
     console.error('Error al eliminar el usuario:', error.message);
     res.status(500).json({ message: 'Error interno del servidor' });
   }
@@ -84,10 +76,9 @@ export const getUsuarioById = async (req, res) => {
     if (!usuario) {
       return res.status(404).json({ message: 'Usuario no encontrado' });
     }
-    usuario.password = undefined; // ¡Muy bien hecho esto!
+    usuario.password = undefined;
     res.json(usuario);
   } catch (error) {
-    // --- CORREGIDO ---
     console.error('Error al obtener el usuario:', error.message);
     res.status(500).json({ message: 'Error interno del servidor' });
   }
