@@ -4,7 +4,7 @@ import Usuario from '../models/usuario.model.js';
 import Historico from '../models/historico.model.js'; 
 
 export const createPrestamo = async (req, res) => {
-  const { usuarioId, libroId, fechaDevolucionLimite } = req.body;
+  const { usuario: usuarioId, libro: libroId, fechaDevolucion: fechaDevolucionLimite } = req.body;
 
   try {
     const libro = await Libro.findById(libroId);
@@ -18,7 +18,7 @@ export const createPrestamo = async (req, res) => {
     const nuevoPrestamo = new Prestamo({
       usuario: usuarioId,
       libro: libroId,
-      fechaDevolucionLimite
+      fechaDevolucionLimite: fechaDevolucionLimite 
     });
     await nuevoPrestamo.save();
     await Libro.findByIdAndUpdate(libroId, { disponible: false });
