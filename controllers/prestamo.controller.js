@@ -11,14 +11,16 @@ export const createPrestamo = async (req, res) => {
     if (!libro || !libro.disponible) {
       return res.status(400).json({ message: 'Libro no disponible' });
     }
+
     const usuario = await Usuario.findById(usuarioId);
-    if (!usuario || usuario.situacion !== 'Vigente') {
+    if (!usuario || (usuario.situacion !== 'Vigente' && usuario.situacion !== 'Prestamo Activo')) {
       return res.status(400).json({ message: 'Usuario no apto para préstamo (situación no vigente)' });
     }
+
     const nuevoPrestamo = new Prestamo({
       usuario: usuarioId,
       libro: libroId,
-      fechaDevolucionLimite: fechaDevolucionLimite 
+      fechaDevolucionLimite
     });
     await nuevoPrestamo.save();
     await Libro.findByIdAndUpdate(libroId, { disponible: false });
@@ -33,7 +35,6 @@ export const createPrestamo = async (req, res) => {
 
 
 export const devolverPrestamo = async (req, res) => {
-
   try {
     const prestamo = await Prestamo.findById(req.params.id);
     if (!prestamo) {
@@ -77,7 +78,7 @@ export const devolverPrestamo = async (req, res) => {
 
 export const getAllPrestamos = async (req, res) => {
   try {
-    const prestamos = await Prestamo.find()
+    const prestamos = await Prestamo.find({ estado: 'Activo' })
       .populate('usuario', 'nombre correo rut') 
       .populate('libro', 'titulo autor');      
     res.json(prestamos);
@@ -86,6 +87,7 @@ export const getAllPrestamos = async (req, res) => {
     res.status(500).json({ message: 'Error interno del servidor' });
   }
 };
+
 
 export const getMisPrestamos = async (req, res) => {
   try {
