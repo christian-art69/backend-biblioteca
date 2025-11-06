@@ -20,7 +20,7 @@ export const createPrestamo = async (req, res) => {
     const nuevoPrestamo = new Prestamo({
       usuario: usuarioId,
       libro: libroId,
-      fechaDevolucionLimite
+      fechaDevolucionLimite // Asegúrate de que el modelo use este campo
     });
     await nuevoPrestamo.save();
     await Libro.findByIdAndUpdate(libroId, { disponible: false });
@@ -43,6 +43,12 @@ export const devolverPrestamo = async (req, res) => {
     if (prestamo.estado === 'Devuelto') {
       return res.status(400).json({ message: 'Este libro ya fue devuelto' });
     }
+
+    // --- CÓDIGO CORREGIDO PARA AUTORIZACIÓN ---
+    if (req.user.role !== 'Admin' && prestamo.usuario.toString() !== req.user.id) {
+        return res.status(403).json({ message: 'Acceso denegado. Solo un administrador o el usuario dueño del préstamo puede realizar esta acción.' });
+    }
+    // ------------------------------------------
 
     const fechaDevolucionReal = Date.now();
     prestamo.estado = 'Devuelto';

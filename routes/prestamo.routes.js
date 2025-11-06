@@ -15,7 +15,7 @@ import {
 const router = express.Router();
 
 router.post('/', [verifyToken, isAdmin], createPrestamo);
-router.put('/devolver/:id', [verifyToken, isAdmin], devolverPrestamo);
+router.put('/devolver/:id', verifyToken, devolverPrestamo); 
 router.get('/', [verifyToken, isAdmin], getAllPrestamos);
 router.get('/mis-prestamos', verifyToken, getMisPrestamos);
 router.get('/usuario/:usuarioId', [verifyToken, isAdmin], getPrestamosPorUsuario);
